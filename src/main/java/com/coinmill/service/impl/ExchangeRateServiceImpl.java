@@ -39,29 +39,18 @@ public class ExchangeRateServiceImpl implements ExchangeRateService{
 	@Override
 	@Transactional
     public ExchangeRate createExchangeRate(ExchangeRateDto exchangeRateDto) {
-		ExchangeRate createExchangeRate = null;
+		ExchangeRate createExchangeRate = new ExchangeRate();
 		
 		createExchangeRate.setChartName(exchangeRateDto.getChartName());
 		createExchangeRate.setCurrencyCode(exchangeRateDto.getCurrencyCode());
 		createExchangeRate.setCurrencyName(exchangeRateDto.getCurrencyName());
 		createExchangeRate.setCurrencyRate(exchangeRateDto.getCurrencyRate());		
 		createExchangeRate.setDisclaimer(exchangeRateDto.getDisclaimer());
+		createExchangeRate.setUpdatedDate(exchangeRateDto.getRateTime());
 		createExchangeRate.setUpdated(exchangeRateDto.getUpdated());
 		createExchangeRate.setUpdatedIso(exchangeRateDto.getUpdatedIso());
 		createExchangeRate.setUpdateduk(exchangeRateDto.getUpdateduk());
-		
-		
-		if (exchangeRateDto.getUpdated().length()>0) {
-			String dateString = exchangeRateDto.getUpdated().replace(" UTC", "");
-        	SimpleDateFormat sdf = new SimpleDateFormat ("MMM dd, yyyy HH:mm:ss"); 
-        	Date t = new Date(); 
-        	try { 
-        		t = sdf.parse(dateString); 
-        		createExchangeRate.setRateTime(t);
-        	} catch (Exception e) { 
-        		log.info("Unparseable using " + sdf); 
-        	}
-		}
+
 		ExchangeRate saveExchangeRate = exchangeRateRepository.save(createExchangeRate);			
 		
 		return saveExchangeRate;		

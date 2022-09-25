@@ -12,15 +12,19 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import com.coinmill.domain.CoindeskUtil;
 import com.coinmill.dto.CoindeskDto;
+import com.coinmill.dto.ExchangePriceDto;
 import com.coinmill.dto.ExchangeRateDto;
 import com.coinmill.entity.CurrencySet;
+import com.coinmill.entity.ExchangeRate;
 //import com.coinmill.entity.CurrencyRate;
 import com.coinmill.service.CoindeskService;
 import com.coinmill.service.CurrencySetService;
+import com.coinmill.service.ExchangeRateService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,24 +33,32 @@ import lombok.extern.slf4j.Slf4j;
 public class CoindeskServiceImpl implements CoindeskService{
 	
 	@Autowired
-	CurrencySetService currencySetService; 
+	CurrencySetService currencySetService;
 	
-	List<CurrencySet> listCurrencySet = new ArrayList<>(); 
+	@Autowired
+	ExchangeRateService exchangeRateService; 	
+	
+	@Lazy
+	List<CurrencySet> listCurrencySet = new ArrayList<>();
+	
+	List<ExchangeRateDto> listExchangeRate = new ArrayList<>();
 	
     @PostConstruct
     private void init(){
+    	log.info("CurrencySetService init....");
     	listCurrencySet = currencySetService.listAllCurrencySet();
     }
 	
-    @Override	
-    public List<ExchangeRateDto> getCoindesk(String url) throws Exception {
-    	    	
+    @Override
+    public boolean checkUrl(String url) {
 		String regexp = "((http|ftp|https)://)(([a-zA-Z0-9\\._-]+\\.[a-zA-Z]{2,6})|([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}))(:[0-9]{1,4})*(/[a-zA-Z0-9\\&%_\\./-~-]*)?";;
 		
 		boolean isMatch = Pattern.matches(regexp, url);
-    	if (!isMatch) {
-    		throw new Exception("網址格式不符合");
-    	}
+    	return isMatch;
+    }
+    
+    @Override	
+    public List<ExchangeRateDto> getCoindesk(String url) throws Exception {    	    
     	
     	try {
     		String json =  CoindeskUtil.stream(url);
@@ -56,7 +68,6 @@ public class CoindeskServiceImpl implements CoindeskService{
     		ExchangeRateDto exchangeRateUsd = new ExchangeRateDto();
     		ExchangeRateDto exchangeRateEur = new ExchangeRateDto();
     		ExchangeRateDto exchangeRateGbp = new ExchangeRateDto();
-    		List<ExchangeRateDto> listExchangeRate = new ArrayList<>();
     		
     		if (coindeskDto.getTime().getUpdated().length()>0) {
     			String dateString = coindeskDto.getTime().getUpdated().replace(" UTC", "");
@@ -105,8 +116,12 @@ public class CoindeskServiceImpl implements CoindeskService{
 
     		listExchangeRate.add(exchangeRateGbp);
     		listExchangeRate.add(exchangeRateUsd);    		
-    		listExchangeRate.add(exchangeRateEur);    		
-    		    		
+    		listExchangeRate.add(exchangeRateEur);   
+    		
+    		exchangeRateService.createExchangeRate(exchangeRateGbp);
+    		exchangeRateService.createExchangeRate(exchangeRateEur);
+    		exchangeRateService.createExchangeRate(exchangeRateUsd);
+    		
     		return listExchangeRate;
     		//return coindeskDto;
     	}catch (IOException e){
@@ -120,12 +135,52 @@ public class CoindeskServiceImpl implements CoindeskService{
     @Override	
     public String getCoinName(String coinCode) {
         List<CurrencySet> findList = listCurrencySet.stream().filter(item -> item.getCurrencyCode().equals(coinCode)).collect(Collectors.toList());
-        log.info("findList: " + findList.toString());
+        //log.info("findList: " + findList.toString());
         if(findList.size()>0){
             return findList.get(0).getCurrencyName();
         }
         return null;    	
     }
+    
+    @Override
+    public Double getCoinPrice(String coinCode, Double codePrice) {
+    	if (listExchangeRate.isEmpty()) {
+    		return null;
+    	}
+    	
+        List<ExchangeRateDto> findList = listExchangeRate.stream().filter(item -> item.getCurrencyCode().equals(coinCode)).collect(Collectors.toList());
+        //log.info("findList: " + findList.toString());
+        if(findList.size()>0){
+        	return (codePrice/findList.get(0).getCurrencyRate());
+        }
+        return null;
+    }
+    
+    @Override
+    public ExchangePriceDto exchangePriceDto(String coinCode, Double codePrice) {
+    	
+    	ExchangePriceDto exchangePriceDto = new ExchangePriceDto();
+    	
+    	if (listExchangeRate.isEmpty()) {
+    		return null;
+    	}
+    	
+        List<ExchangeRateDto> findList = listExchangeRate.stream().filter(item -> item.getCurrencyCode().equals(coinCode)).collect(Collectors.toList());
+        //log.info("findList: " + findList.toString());
+        if(findList.size()>0){
+        	
+        	exchangePriceDto.setChartName(findList.get(0).getChartName());
+        	exchangePriceDto.setCurrencyCode(coinCode);
+        	exchangePriceDto.setCurrencyRate(findList.get(0).getCurrencyRate());
+        	exchangePriceDto.setCurrencyName(findList.get(0).getCurrencyName());
+        	exchangePriceDto.setOriginPrice(codePrice);
+        	exchangePriceDto.setRateTime(findList.get(0).getRateTime());
+        	exchangePriceDto.setExchangePrice((codePrice/findList.get(0).getCurrencyRate()));        	
+        	return exchangePriceDto;
+        }
+        return null;    	    	
+
+    }    
     
     /*
     @Override

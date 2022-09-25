@@ -1,13 +1,15 @@
 package com.coinmill.service;
 
-import java.util.Optional;
 
-import com.coinmill.dto.CoindeskDto;
-//import com.coinmill.entity.CurrencyRate;
+import java.util.List;
+
+import com.coinmill.dto.ExchangeRateDto;
 
 public interface CoindeskService {
 
-	CoindeskDto<?> getCoindesk(String url);
+	List<ExchangeRateDto> getCoindesk(String url) throws Exception;
+	
+	String getCoinName(String coinCode);
 	
 	//Optional<CurrencyRate> createCoinRate(CoindeskDto coindeskDto);
 	

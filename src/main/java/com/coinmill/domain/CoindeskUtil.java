@@ -37,12 +37,12 @@ public class CoindeskUtil {
     public static <T> CoindeskDto<T> convert(String json, Class<T> targetClass) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
 
-        CoindeskDto<T> hit = null;
+        CoindeskDto<T> coindeskDto = null;
 
         JavaType classType = objectMapper.getTypeFactory().constructParametricType(CoindeskDto.class, targetClass);
-        hit = objectMapper.readValue(json, classType);
+        coindeskDto = objectMapper.readValue(json, classType);
 
-        return hit;
+        return coindeskDto;
     }	    
     
     

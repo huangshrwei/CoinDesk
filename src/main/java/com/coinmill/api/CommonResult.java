@@ -2,7 +2,6 @@ package com.coinmill.api;
 
 /**
  * 通用返回对象
- * Created by macro on 2019/4/19.
  */
 public class CommonResult<T> {
     private long code;
@@ -21,7 +20,7 @@ public class CommonResult<T> {
     /**
      * 成功返回结果
      *
-     * @param data 获取的数据
+     * @param data 返回的資料
      */
     public static <T> CommonResult<T> success(T data) {
         return new CommonResult<T>(ResultCode.SUCCESS.getCode(), ResultCode.SUCCESS.getMessage(), data);
@@ -30,8 +29,8 @@ public class CommonResult<T> {
     /**
      * 成功返回结果
      *
-     * @param data 获取的数据
-     * @param  message 提示信息
+     * @param data 返回的資料
+     * @param  message 訊息
      */
     public static <T> CommonResult<T> success(T data, String message) {
         return new CommonResult<T>(ResultCode.SUCCESS.getCode(), message, data);
@@ -39,7 +38,7 @@ public class CommonResult<T> {
 
     /**
      * 失败返回结果
-     * @param errorCode 错误码
+     * @param errorCode 錯誤代碼
      */
     public static <T> CommonResult<T> failed(IErrorCode errorCode) {
         return new CommonResult<T>(errorCode.getCode(), errorCode.getMessage(), null);
@@ -61,14 +60,14 @@ public class CommonResult<T> {
     }
 
     /**
-     * 参数验证失败返回结果
+     * 参数驗證失败返回结果
      */
     public static <T> CommonResult<T> validateFailed() {
         return failed(ResultCode.VALIDATE_FAILED);
     }
 
     /**
-     * 参数验证失败返回结果
+     * 参数驗證失败返回结果
      * @param message 提示信息
      */
     public static <T> CommonResult<T> validateFailed(String message) {
@@ -76,18 +75,25 @@ public class CommonResult<T> {
     }
 
     /**
-     * 未登录返回结果
+     * 未登錄返回结果
      */
     public static <T> CommonResult<T> unauthorized(T data) {
         return new CommonResult<T>(ResultCode.UNAUTHORIZED.getCode(), ResultCode.UNAUTHORIZED.getMessage(), data);
     }
 
     /**
-     * 未授权返回结果
+     * 未授授權回结果
      */
     public static <T> CommonResult<T> forbidden(T data) {
         return new CommonResult<T>(ResultCode.FORBIDDEN.getCode(), ResultCode.FORBIDDEN.getMessage(), data);
     }
+    
+    /**
+     * 網址無效回结果
+     */
+    public static <T> CommonResult<T> http_failed(T data) {
+        return new CommonResult<T>(ResultCode.HTTP_FAILED.getCode(), ResultCode.HTTP_FAILED.getMessage(), data);
+    }    
 
     public long getCode() {
         return code;

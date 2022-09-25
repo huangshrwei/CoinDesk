@@ -53,8 +53,8 @@ public class ExchangeRateServiceImpl implements ExchangeRateService{
 		
 		if (exchangeRateDto.getUpdated().length()>0) {
 			String dateString = exchangeRateDto.getUpdated().replace(" UTC", "");
-        	SimpleDateFormat sdf = new SimpleDateFormat ("MMM dd, yyyyy HH:mm:ss"); 
-        	Date t; 
+        	SimpleDateFormat sdf = new SimpleDateFormat ("MMM dd, yyyy HH:mm:ss"); 
+        	Date t = new Date(); 
         	try { 
         		t = sdf.parse(dateString); 
         		createExchangeRate.setRateTime(t);

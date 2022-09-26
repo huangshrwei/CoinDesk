@@ -13,12 +13,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class CoindeskUtil {
 
+	//將網頁內容傳回成map格式
     public static JsonNode get(String urlString) throws Exception {
     	URL url = new URL(urlString);    	
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readTree(url);
     }	
 	
+    // 將網頁內容傳回字串
     public static String stream(String urlString) throws IOException {    	
     	URL url = new URL(urlString); 
         try (InputStream input = url.openStream()) {

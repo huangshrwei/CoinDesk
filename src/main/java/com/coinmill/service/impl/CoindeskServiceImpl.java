@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
-import com.coinmill.domain.CoindeskUtil;
+import com.coinmill.api.CoindeskUtil;
 import com.coinmill.dto.CoindeskDto;
 import com.coinmill.dto.ExchangePriceDto;
 import com.coinmill.dto.ExchangeRateDto;

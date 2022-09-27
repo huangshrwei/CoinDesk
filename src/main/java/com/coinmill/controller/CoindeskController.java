@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.coinmill.api.CommonResult;
 import com.coinmill.api.ResultCode;
-import com.coinmill.domain.CoindeskUtil;
+import com.coinmill.api.CoindeskUtil;
 import com.coinmill.dto.CoindeskDto;
 import com.coinmill.dto.ExchangePriceDto;
 import com.coinmill.dto.ExchangeRateDto;
@@ -83,7 +83,7 @@ public class CoindeskController {
 			  @ApiParam(
 	    			    name = "codePrice",
 	    			    type = "Double",
-	    			    value = "金額",
+	    			    value = "幣別金額",
 	    			    defaultValue = "0.00",
 	    			    required = true)
 	    	  @RequestParam Double codePrice) 

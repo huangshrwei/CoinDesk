@@ -1,4 +1,4 @@
-package com.coinmill.domain;
+package com.coinmill.api;
 
 import java.io.BufferedReader;
 import java.io.IOException;

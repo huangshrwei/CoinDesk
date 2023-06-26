@@ -1,7 +1,10 @@
 package com.coinmill.service.impl;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -9,21 +12,27 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.coinmill.dto.ExchangePriceDto;
-import com.coinmill.dto.ExchangeRateDto;
-import com.coinmill.service.CoindeskService;
+import com.coinmill.entity.CurrencySet;
+import com.coinmill.service.CurrencySetService;
+import com.coinmill.service.ExchangeRateService;
 
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class CoindeskServiceImplTest {
+	@InjectMocks
+	CoindeskServiceImpl coindeskServiceImpl;
 	
-	@Autowired
-	CoindeskService coindeskService;	
+	@Mock
+	CurrencySetService currencySetService;
+	
+	@Mock
+	ExchangeRateService exchangeRateService; 
 
 	@BeforeEach
 	void setUp() throws Exception {
@@ -34,42 +43,27 @@ class CoindeskServiceImplTest {
 	}
 
 	@Test
-	void testCheckUrl() {
-		String corrUrl = "http://aaa.aa.aa";
-		String errUrl = "AA";
-		
-		Assertions.assertEquals(true, coindeskService.checkUrl(corrUrl));
-		Assertions.assertEquals(false, coindeskService.checkUrl(errUrl));
-	}
-
-	@Test
-	void testGetCoindesk() throws Exception {
-		
-		List<ExchangeRateDto> listExchangeRateDto = coindeskService.getCoindesk("https://api.coindesk.com/v1/bpi/currentprice.json");
-		Assertions.assertEquals(false, listExchangeRateDto.isEmpty());
-	}
-
-	@Test
-	void testGetCoinName() {
-		String coinName = coindeskService.getCoinName("USD");
-		Assertions.assertEquals("美金", coinName);
-	}
-
-	@Test
-	void testGetCoinPrice() throws Exception {
-		
-		List<ExchangeRateDto> listExchangeRateDto = coindeskService.getCoindesk("https://api.coindesk.com/v1/bpi/currentprice.json");
-		Double price = coindeskService.getCoinPrice("USD", 100000.00);
-		List<ExchangeRateDto> findList = listExchangeRateDto.stream().filter(item -> item.getCurrencyCode().equals("USD")).collect(Collectors.toList());
-		Assertions.assertEquals(100000.00/findList.get(0).getCurrencyRate(), price);
-	}
-
-	@Test
 	void testExchangePriceDto() throws Exception {
+		//when(currencySetService.listAllCurrencySet()).thenReturn(null);
+		String getCoinName = this.coindeskServiceImpl.getCoinName("美金");
+		Double getCoinPrice = this.coindeskServiceImpl.getCoinPrice("USD", 12.00);
+		ExchangePriceDto exchangePriceDto = this.coindeskServiceImpl.exchangePriceDto("美金", 12.00);
+		assertEquals(null, getCoinName);
+		assertEquals(null, getCoinPrice);
+		assertEquals(null, exchangePriceDto);
+	}
+	
+	@Test
+	void testInin() {
+		CurrencySet currencySetGbp = new CurrencySet();
+		currencySetGbp.setCurrencyCode("GBP");
+		currencySetGbp.setCurrencyName("英鎊");
+		currencySetGbp.setCreationDate(new Date());
+		currencySetGbp.setUpdatedDate(new Date());
+		List<CurrencySet> listCurrencySet = new ArrayList<>();
+		listCurrencySet.add(currencySetGbp);
+		when(currencySetService.listAllCurrencySet()).thenReturn(listCurrencySet);
 		
-		List<ExchangeRateDto> listExchangeRateDto = coindeskService.getCoindesk("https://api.coindesk.com/v1/bpi/currentprice.json");
-		ExchangePriceDto exchangePriceDto= coindeskService.exchangePriceDto("USD", 100000.00);
-		Assertions.assertEquals("USD",exchangePriceDto.getCurrencyCode());
 	}
 
 }

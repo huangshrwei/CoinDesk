@@ -41,12 +41,22 @@ public class CoindeskServiceImpl implements CoindeskService{
 	@Lazy
 	List<CurrencySet> listCurrencySet = new ArrayList<>();
 	
-	List<ExchangeRateDto> listExchangeRate = new ArrayList<>();
+	List<ExchangeRateDto> listExchangeRateDto = new ArrayList<>();
 	
-    @PostConstruct
-    private void init(){
+    private void getAll(){
     	log.info("CurrencySetService init....");
     	listCurrencySet = currencySetService.listAllCurrencySet();
+    	if (listExchangeRateDto.size() == 0) {
+    		List<ExchangeRate> listExchangeRate = exchangeRateService.listAllExchangeRate();
+    		for (int i = 0; i < listExchangeRate.size(); i ++) {
+    			ExchangeRateDto exchangeRateDto = new ExchangeRateDto();
+    			exchangeRateDto.setChartName(listExchangeRate.get(i).getChartName());
+    			exchangeRateDto.setCurrencyCode(listExchangeRate.get(i).getCurrencyCode());
+    			exchangeRateDto.setCurrencyName(listExchangeRate.get(i).getChartName());
+    			exchangeRateDto.setCurrencyRate(listExchangeRate.get(i).getCurrencyRate());
+    			listExchangeRateDto.add(exchangeRateDto);
+    		}
+    	}
     }
 	
     @Override
@@ -114,15 +124,15 @@ public class CoindeskServiceImpl implements CoindeskService{
     		exchangeRateEur.setUpdatedIso(coindeskDto.getTime().getUpdatedISO());
     		exchangeRateEur.setUpdateduk(coindeskDto.getTime().getUpdateduk());  
 
-    		listExchangeRate.add(exchangeRateGbp);
-    		listExchangeRate.add(exchangeRateUsd);    		
-    		listExchangeRate.add(exchangeRateEur);   
+    		listExchangeRateDto.add(exchangeRateGbp);
+    		listExchangeRateDto.add(exchangeRateUsd);    		
+    		listExchangeRateDto.add(exchangeRateEur);   
     		
     		exchangeRateService.createExchangeRate(exchangeRateGbp);
     		exchangeRateService.createExchangeRate(exchangeRateEur);
     		exchangeRateService.createExchangeRate(exchangeRateUsd);
     		
-    		return listExchangeRate;
+    		return listExchangeRateDto;
     		//return coindeskDto;
     	}catch (IOException e){
     		log.warn("異常:{}", e.getMessage());
@@ -134,6 +144,7 @@ public class CoindeskServiceImpl implements CoindeskService{
     
     @Override	
     public String getCoinName(String coinCode) {
+    	getAll();
         List<CurrencySet> findList = listCurrencySet.stream().filter(item -> item.getCurrencyCode().equals(coinCode)).collect(Collectors.toList());
         //log.info("findList: " + findList.toString());
         if(findList.size()>0){
@@ -144,11 +155,12 @@ public class CoindeskServiceImpl implements CoindeskService{
     
     @Override
     public Double getCoinPrice(String coinCode, Double codePrice) {
-    	if (listExchangeRate.isEmpty()) {
+    	getAll();
+    	if (listExchangeRateDto.isEmpty()) {
     		return null;
     	}
     	
-        List<ExchangeRateDto> findList = listExchangeRate.stream().filter(item -> item.getCurrencyCode().equals(coinCode)).collect(Collectors.toList());
+        List<ExchangeRateDto> findList = listExchangeRateDto.stream().filter(item -> item.getCurrencyCode().equals(coinCode)).collect(Collectors.toList());
         //log.info("findList: " + findList.toString());
         if(findList.size()>0){
         	return (codePrice/findList.get(0).getCurrencyRate());
@@ -158,14 +170,14 @@ public class CoindeskServiceImpl implements CoindeskService{
     
     @Override
     public ExchangePriceDto exchangePriceDto(String coinCode, Double codePrice) {
-    	
+    	getAll();
     	ExchangePriceDto exchangePriceDto = new ExchangePriceDto();
     	
-    	if (listExchangeRate.isEmpty()) {
+    	if (listExchangeRateDto.isEmpty()) {
     		return null;
     	}
     	
-        List<ExchangeRateDto> findList = listExchangeRate.stream().filter(item -> item.getCurrencyCode().equals(coinCode)).collect(Collectors.toList());
+        List<ExchangeRateDto> findList = listExchangeRateDto.stream().filter(item -> item.getCurrencyCode().equals(coinCode)).collect(Collectors.toList());
         //log.info("findList: " + findList.toString());
         if(findList.size()>0){
         	
